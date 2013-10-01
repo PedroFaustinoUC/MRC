@@ -24,5 +24,10 @@ var app = {
 	    $.mobile.allowCrossDomainPages = true;
 	    $.mobile.defaultPageTransition='none';
 	    $.mobile.defaultDialogTransition='none';
+	    //Variável que armazena o identificador unico do telemovel
+	    //Get the device's Universally Unique Identifier (UUID).
+	    var uniqueID = device.uuid;
+
+
     }
 };
