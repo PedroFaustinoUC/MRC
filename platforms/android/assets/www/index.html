@@ -18,11 +18,10 @@
 			<h1>UC - Front Desk</h1>
 			<a href="#painelDefinicoes" data-icon="gear" class="ui-btn-right"
 				data-iconpos="notext"></a>
-			<div data-role="navbar" data-iconpos="left">
+			<div data-role="navbar">
 				<ul>
-					<li><a href="#" class="ui-btn-active">Gerar
-							Senha</a></li>
-					<li><a href="#" >Minhas Senhas</a></li>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Gerar	Senha</a></li>
+					<li><a href="#minhas_senhas_page" >Minhas Senhas</a></li>
 				</ul>
 			</div>
 		</div>
@@ -50,13 +49,12 @@
 						<option></option>
 					</select>
 				</div>
-				<!-- DISABLED: <input value="Avançar" type="submit">-->
 			</form>
 			<div class="ui-grid-a">
 				<div class="ui-block-a">
 				</div>
 				<div class="ui-block-b">
-					<a href="#info_gerar_senha_page" data-role="button" data-icon="arrow-r" data-iconpos="right" data-inline="true">Avançar</a>
+					<a href="#info_gerar_senha_page" id="gerar_senha_page_avancarButton" data-role="button" class="ui-disabled" data-icon="arrow-r" data-iconpos="right" data-inline="true">Avançar</a>
 				</div>
 			</div>
 			<!-- /grid-a -->
@@ -69,31 +67,27 @@
 		<!-- Header -->
 		<div data-role="header" style="overflow: hidden;">
 			<h1>UC - Front Desk</h1>
-			<a href="#" data-icon="gear" class="ui-btn-right"
-				data-iconpos="notext"></a>
-				<a href="#gerar_senha_page" data-icon="back" class="ui-btn-left"
-				data-iconpos="notext"></a>
-			<div data-role="navbar" data-iconpos="left">
+			<a href="#" data-icon="gear" class="ui-btn-right" data-iconpos="notext"></a>
+				<a href="#gerar_senha_page" data-icon="back" class="ui-btn-left" data-iconpos="notext"></a>
+			<div data-role="navbar">
 				<ul>
-					<li><a href="#" class="ui-btn-active">Gerar
-							Senha</a></li>
-					<li><a href="#" >Minhas Senhas</a></li>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Gerar	Senha</a></li>
+					<li><a href="#minhas_senhas_page" >Minhas Senhas</a></li>
 				</ul>
 			</div>
 		</div>
 		<!-- Content -->
 		<div data-role="content">
 			<div class="center-wrapper">
-				<button data-theme="b" data-inline="true" data-icon="refresh"
-					data-iconpos="right">Senha Actual: 34</button>
+				<button data-theme="b" data-inline="true" data-icon="refresh" id="senhaActual" data-iconpos="right">Senha Actual</button>
 			</div>
 			<form>
 		     <label for="tempo_espera">Tempo médio de espera:</label>
-		     <input name="tempo_espera" id="tempo_espera" value="10 minutos" readonly="readonly" type="text">
+		     <input name="tempo_espera" id="tempo_espera" readonly="readonly" type="text">
 		     <label for="tempo_atendimento">Tempo médio de atendimento:</label>
-		     <input name="tempo_atendimento" id="tempo_atendimento" value="8 minutos" readonly="readonly" type="text">
+		     <input name="tempo_atendimento" id="tempo_atendimento" readonly="readonly" type="text">
 		     <label for="hora_prevista">Hora prevista de atendimento:</label>
-		     <input name="hora_prevista" id="hora_prevista" value="13:54" readonly="readonly" type="text">
+		     <input name="hora_prevista" id="hora_prevista" readonly="readonly" type="text">
 		</form>
 		<div class="center-wrapper">
 				<a href="#" data-inline="true" type="submit">Gerar Senha</a>
@@ -101,7 +95,24 @@
 		</div>
 	</div>
 
-
+<!---------------------------- Página Inicial de Minhas Senhas ---------------------------->
+	<div data-role="page" id="minhas_senhas_page">
+	<!-- Header -->
+		<div data-role="header" style="overflow: hidden;">
+			<h1>UC - Front Desk</h1>
+			<a href="#painelDefinicoes" data-icon="gear" class="ui-btn-right" data-iconpos="notext"></a>
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#gerar_senha_page" >Gerar Senha</a></li>
+					<li><a href="#" class="ui-btn-active ui-state-persist">Minhas Senhas</a></li>
+				</ul>
+			</div>
+		</div>
+		<!-- Content -->
+		<div data-role="content">
+		minhas senhas
+		</div>
+	</div>
 
 
 
