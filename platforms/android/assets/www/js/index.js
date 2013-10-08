@@ -6,16 +6,9 @@ var app = {
     
     // Bind Event Listeners
     bindEvents: function() {
-    	document.addEventListener('backbutton', this.onBackKeyDown, false);
     	document.addEventListener('deviceready', this.onDeviceReady, false);
     },
     
-    /*
-     * @Função executada quando se clica na tecla de retroceder
-     */
-    onBackKeyDown: function() {
-		navigator.app.exitApp();
-	},
     
     /*
      * @Função executada quando a APP inicia
@@ -29,9 +22,8 @@ var app = {
 	    $.mobile.allowCrossDomainPages = true;
 	    $.mobile.defaultPageTransition='none';
 	    $.mobile.defaultDialogTransition='none';
-	    
-
-		
+	    //Listener da tecla de retroceder
+    	document.addEventListener("backbutton", onBackKeyDown, false);
 
 	    /*
 	     * @Declaração de variáveis globais
@@ -39,12 +31,17 @@ var app = {
 	    //Variável que armazena o identificador unico do telemovel
 	    var uniqueID = device.uuid;
 	    //URL base do webservice
-	    //var rootURL = "http://10.3.3.126/mrc/api/";
-	    var rootURL = "http://192.168.1.64/mrc/api/";
+	    var rootURL = "http://10.3.3.126/mrc/api/";
+	    //var rootURL = "http://192.168.1.64/mrc/api/";
 	    
 	    /*
 	     * @Declaração de Funções
 	     */
+	    
+	    //Quando se carrega na tecla de retroceder a aplicação fecha
+	    function onBackKeyDown() {
+			navigator.app.exitApp();
+		};
 	    //Webservice - carregamento dos serviços de atendimento
 	    function getFrontDesk(){
 		    $.ajax({
@@ -115,8 +112,8 @@ var app = {
 				url: rootURL+"frontdesk/"+idFrontDesk+"/localizacao/"+idLocalizacao+"/balcaoatendimento/"+idBalcaoAtendimento,
 				dataType: "json", // data type of response
 				success: function(data){
-					$('#tempo_espera').val(data.tempoEspera+" minutos");
-					$('#tempo_atendimento').val(data.tempoAtendido+" minutos");
+					$('#tempo_espera').val(data.tempoEspera);
+					$('#tempo_atendimento').val(data.tempoAtendido);
 					$('#hora_prevista').val(data.horaPrevista);
 					$('#senhaActual').empty();
 		            $('#senhaActual').siblings('.ui-btn-inner').children('.ui-btn-text').text("Senha Actual: "+data.senha);
@@ -127,6 +124,28 @@ var app = {
 				}
 			});
 		    }
+	    
+	    function addSenha(frontDesk, localizacao,balcaoAtendimento,uniqueID) {
+	    	alert("entrou");
+	    	$.ajax({
+	    		type: 'POST',
+	    		contentType: 'application/json',
+	    		url: rootURL+"senha",
+	    		dataType: "json",
+	    		data: JSON.stringify({
+	    			"frontDesk": frontDesk, 
+	    			"localizacao": localizacao, 
+	    			"balcaoAtendimento": balcaoAtendimento,
+	    			"uniqueID": uniqueID
+	    			}),
+	    		success: function(data, textStatus, jqXHR){
+	    			alert("sucesso");
+	    		},
+	    		error: function(jqXHR, textStatus, errorThrown){
+	    			alert('Erro: ' + textStatus);
+	    		}
+	    	});
+	    }
 
 	    /* ____________
 	     * |IMPORTANTE|
@@ -141,12 +160,25 @@ var app = {
 	     */   
 	    //Cada acesso à página "Gerar Ticket" requer uma chamada ao webservice correspondente
 	    //Isto permite ter os dados actualizados
-	    $("#gerar_senha_page").on( "pageshow", getFrontDesk());
+	    $("#gerar_senha_page").on( "pageshow", function(){
+	    	$("#localizacao").empty();
+	    	$("#localizacao").selectmenu( "disable" );
+	    	$( "#localizacao" ).selectmenu( "refresh" );
+	    	$('#balcaoAtendimento').empty();
+	    	$('#balcaoAtendimento').selectmenu( "disable" );
+	    	$( "#balcaoAtendimento" ).selectmenu( "refresh" );
+	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
+	    	getFrontDesk();
+	    });
 	    
 	    //Quando o select "Serviço de Atendimento" for alterado o select "Localização" fica activo
 	    //Após o select "Localizacao" ficar activo, são carregados os dados
 	    $("#frontdesk").on("change",function(){
 	    	$("#localizacao").selectmenu( "enable" );
+	    	$('#balcaoAtendimento').empty();
+	    	$('#balcaoAtendimento').selectmenu( "disable" );
+	    	$( "#balcaoAtendimento" ).selectmenu( "refresh" );
+	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
 	    	getLocalizacao($("#frontdesk").val());
 	    })
 	    
@@ -171,5 +203,8 @@ var app = {
 	    	getCurrentSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val());
 	    })
 	    
+	    $("#info_gerar_senha_page_gerarTicketButton").on("click",function(){
+	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID);
+	    })
     }
 };
