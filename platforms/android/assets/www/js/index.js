@@ -11,10 +11,10 @@ var app = {
     
     
     /*
-     * @Função executada quando a APP inicia
+     * @FunÃ§Ã£o executada quando a APP inicia
      */
     onDeviceReady: function() {
-    	//Configurações para suporte do PhoneGap
+    	//ConfiguraÃ§Ãµes para suporte do PhoneGap
     	//http://view.jquerymobile.com/1.3.2/dist/demos/faq/how-configure-phonegap-cordova.html
     	$.support.cors=true;
 		$.mobile.buttonMarkup.hoverDelay=0;
@@ -22,19 +22,16 @@ var app = {
 	    $.mobile.allowCrossDomainPages = true;
 	    $.mobile.defaultPageTransition='none';
 	    $.mobile.defaultDialogTransition='none';
-	    
-	    var pushNotification = window.plugins.pushNotification;
-	    pushNotification.register(app.successHandler, app.errorHandler,{"senderID":"497143846050","ecb":"app.onNotificationGCM"});
-	    
+	        
 	    //Listener da tecla de retroceder
     	document.addEventListener("backbutton", onBackKeyDown, false);
     	
     	document.addEventListener("offline", onOffline, false);
 
 	    /*
-	     * @Declaração de variáveis globais
+	     * @DeclaraÃ§Ã£o de variÃ¡veis globais
 	     */
-	    //Variável que armazena o identificador unico do telemovel
+	    //VariÃ¡vel que armazena o identificador unico do telemovel
 	    var uniqueID = device.uuid;
 	    //URL base do webservice
 	    //var rootURL = "http://10.3.3.126/mrc/api/";
@@ -44,10 +41,10 @@ var app = {
 	    //var rootURL = "http://192.168.1.64/mrc/api/";
 	    
 	    /*
-	     * @Declaração de Funções
+	     * @DeclaraÃ§Ã£o de FunÃ§Ãµes
 	     */
 	    
-	    //Quando se carrega na tecla de retroceder a aplicação fecha
+	    //Quando se carrega na tecla de retroceder a aplicaÃ§Ã£o fecha
 	    function onBackKeyDown() {
 	    	//playBeep()
 	    	//vibrate()
@@ -63,12 +60,12 @@ var app = {
 	            'Ok'                  // buttonName
 	        );};
 	        
-	    //Evento da ligação à internet perdida
+	    //Evento da ligaÃ§Ã£o Ã  internet perdida
 		function onOffline(){
-			alert("Sem ligação à internet!");
+			alert("Sem ligaÃ§Ã£o Ã  internet!");
 		};
 		
-	    //Webservice - carregamento dos serviços de atendimento
+	    //Webservice - carregamento dos serviÃ§os de atendimento
 	    function getFrontDesk(){
 		    $.ajax({
 				type: 'GET',
@@ -89,7 +86,7 @@ var app = {
 			});
 		    }
 	    
-	  //Webservice - carregamento das localizações 
+	  //Webservice - carregamento das localizaÃ§Ãµes 
 	    function getLocalizacao(id){
 		    $.ajax({
 				type: 'GET',
@@ -110,7 +107,7 @@ var app = {
 			});
 		    }
 	    
-	  //Webservice - carregamento dos balcões de antedimento
+	  //Webservice - carregamento dos balcÃµes de antedimento
 	    function getBalcaoAtendimento(idFrontDesk,idLocalizacao){
 		    $.ajax({
 				type: 'GET',
@@ -204,7 +201,7 @@ var app = {
 					if(data.senhas.length==0)
 						{
 						$('#minhasSenhasRefresh').empty();
-			            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("Não existem senhas");
+			            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("NÃ£o existem senhas");
 						$( "#minhasSenhasRefresh" ).buttonMarkup( "refresh" );
 						}
 					else 
@@ -262,15 +259,15 @@ var app = {
 	    /* ____________
 	     * |IMPORTANTE|
 	     *  ----------
-	     * @Ecrã inicial da APP corresponde ao menu "Gerar Senha"
-	     * É necessário carregar a lista de Serviços de Atendimento assim que a APP inicia
+	     * @EcrÃ£ inicial da APP corresponde ao menu "Gerar Senha"
+	     * Ã‰ necessÃ¡rio carregar a lista de ServiÃ§os de Atendimento assim que a APP inicia
 	     */
 	    getFrontDesk();
 	    
 	    /*
-	     * @Declaração de Eventos
+	     * @DeclaraÃ§Ã£o de Eventos
 	     */   
-	    //Cada acesso à página "Gerar Ticket" requer uma chamada ao webservice correspondente
+	    //Cada acesso Ã  pÃ¡gina "Gerar Ticket" requer uma chamada ao webservice correspondente
 	    //Isto permite ter os dados actualizados
 	    $("#gerar_senha_page").on( "pageshow", function(){
 	    	$("#localizacao").empty();
@@ -283,8 +280,8 @@ var app = {
 	    	getFrontDesk();
 	    });
 	    
-	    //Quando o select "Serviço de Atendimento" for alterado o select "Localização" fica activo
-	    //Após o select "Localizacao" ficar activo, são carregados os dados
+	    //Quando o select "ServiÃ§o de Atendimento" for alterado o select "LocalizaÃ§Ã£o" fica activo
+	    //ApÃ³s o select "Localizacao" ficar activo, sÃ£o carregados os dados
 	    $("#frontdesk").on("change",function(){
 	    	$("#localizacao").selectmenu( "enable" );
 	    	$('#balcaoAtendimento').empty();
@@ -294,34 +291,34 @@ var app = {
 	    	getLocalizacao($("#frontdesk").val());
 	    })
 	    
-	    //Quando o select "Localização" for alterado o select "Balcao Atendimento" fica activo
-	    //Após o select "Balcao Atendimento" ficar activo, são carregados os dados
+	    //Quando o select "LocalizaÃ§Ã£o" for alterado o select "Balcao Atendimento" fica activo
+	    //ApÃ³s o select "Balcao Atendimento" ficar activo, sÃ£o carregados os dados
 	    $("#localizacao").on("change",function(){
 	    	$("#balcaoAtendimento").selectmenu( "enable" );
 	    	getBalcaoAtendimento($("#frontdesk").val(),$("#localizacao").val());
 	    })
 	    
-	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
+	    //Quando o select "Balcao Atendimento" for alterado o botÃ£o "AvanÃ§ar" fica activo
 	    $("#balcaoAtendimento").on("change",function(){
 	    	$("#gerar_senha_page_avancarButton").removeClass( "ui-disabled" );
 	    })
 	    
-	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
+	    //Quando o select "Balcao Atendimento" for alterado o botÃ£o "AvanÃ§ar" fica activo
 	    $("#info_gerar_senha_page").on("pagebeforeshow",function(){
 	    	getCurrentSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val());
 	    })
 	    
-	    //Quando se clica no botão da senha actual a página é actualizada 
+	    //Quando se clica no botÃ£o da senha actual a pÃ¡gina Ã© actualizada 
 	    $("#senhaActual").on("click",function(){
 	    	getCurrentSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val());
 	    })
 	    
-	    //Quando se clica no botão de gerar ticket é gerada uma nova senha
+	    //Quando se clica no botÃ£o de gerar ticket Ã© gerada uma nova senha
 	    $("#info_gerar_senha_page_gerarTicketButton").on("click",function(){
 	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID);
 	    })
 	    
-	    //Quando a página das senhas é carregada 
+	    //Quando a pÃ¡gina das senhas Ã© carregada 
 	    $("#minhas_senhas_page").on("pageshow",function(){
 	    	getSenhasUtilizador(uniqueID);
 	    })
@@ -338,41 +335,5 @@ var app = {
 	    $("#desistir_minhas_senhas_page").on("click",function(){
 	    	giveUpSenha(idSenhaPopUp);
 		})
-    },
-    
-    // result contains any message sent from the plugin call
-    successHandler: function(result) {
-        alert('Callback Success! Result = '+result)
-    },
-    
-    errorHandler:function(error) {
-        alert(error);
-    },
-    
-    onNotificationGCM: function(e) {
-        switch( e.event )
-        {
-            case 'registered':
-                if ( e.regid.length > 0 )
-                {
-                    console.log("Regid " + e.regid);
-                    alert('registration id = '+e.regid);
-                }
-            break;
- 
-            case 'message':
-              // this is the actual push notification. its format depends on the data model from the push server
-              alert('message = '+e.message+' msgcnt = '+e.msgcnt);
-            break;
- 
-            case 'error':
-              alert('GCM error = '+e.msg);
-            break;
- 
-            default:
-              alert('An unknown GCM event has occurred');
-              break;
-        }
-    }
-	    
+    }   
 };
