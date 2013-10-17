@@ -22,10 +22,26 @@ var app = {
 	    $.mobile.allowCrossDomainPages = true;
 	    $.mobile.defaultPageTransition='none';
 	    $.mobile.defaultDialogTransition='none';
-	        
+	    $.mobile.loadingMessageTextVisible = true;
+	    $.ajaxSetup({ 
+					beforeSend: function() { $.mobile.showPageLoadingMsg(); }, //Show spinner
+					complete: function() { $.mobile.hidePageLoadingMsg() }, //Hide spinner
+					timeout: 5000,
+					error: function(  ){
+						navigator.notification.alert(
+				            'Problema ao conectar com o servidor. Tente novamente.',  // message
+				            null,         // callback
+				            'Erro de ligação',            // title
+				            'Ok'                  // buttonName
+				       		 );
+						return false;
+						}
+					});
+
 	    //Listener da tecla de retroceder
     	document.addEventListener("backbutton", onBackKeyDown, false);
     	
+    	//Listener conexão Internet
     	document.addEventListener("offline", onOffline, false);
 
 	    /*
@@ -51,12 +67,20 @@ var app = {
 	    function onBackKeyDown() {
 	    	//playBeep()
 	    	//vibrate()
-	    	navigator.app.exitApp();
+	    	$.mobile.showPageLoadingMsg("a", "A fechar aplicação");
+	    	setTimeout(function () {navigator.app.exitApp();}, 1000);
+	    	
 		};
-		        
+
 	    //Evento da ligação à internet perdida
 		function onOffline(){
-			alert("Sem ligação à internet!");
+			$.mobile.hidePageLoadingMsg();
+			navigator.notification.alert(
+	            'Certifique-se de que tem ligação à Internet.',  // message
+	            null,         // callback
+	            'Falha de Ligação',            // title
+	            'Ok'                  // buttonName
+	        );
 		};
 		
 	    //Webservice - carregamento dos serviços de atendimento
@@ -73,9 +97,6 @@ var app = {
 			            $('#frontdesk').append($('<option>').text(frontDesk.nome).attr('value', frontDesk.idFrontDesk));
 					});
 					$( "#frontdesk" ).selectmenu( "refresh" );
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -94,9 +115,6 @@ var app = {
 			            $('#localizacao').append($('<option>').text(localizacao.nome).attr('value', localizacao.idLocalizacao));
 					});
 					$( "#localizacao" ).selectmenu( "refresh" );
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -135,9 +153,6 @@ var app = {
 					$('#senhaActual').empty();
 		            $('#senhaActual').siblings('.ui-btn-inner').children('.ui-btn-text').text("Senha Actual: "+data.senha);
 					$( "#senhaActual" ).buttonMarkup( "refresh" );
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -158,9 +173,6 @@ var app = {
 	    		success: function(data, textStatus, jqXHR){
 	    			getSenhaUtilizador(data.id);
 	    			$.mobile.changePage("#popupSenhaActual",{ role: "dialog" } );
-	    		},
-	    		error: function(jqXHR, textStatus, errorThrown){
-	    			alert('Erro: ' + textStatus);
 	    		}
 	    	});
 	    }
@@ -176,9 +188,6 @@ var app = {
 		            $('#dialog_senhaActual').siblings('.ui-btn-inner').children('.ui-btn-text').text("Senha: "+data.senha);
 					$( "#dialog_senhaActual" ).buttonMarkup( "refresh" );
 					$('#dialog_hora_prevista').val(data.horaPrevista);
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -223,9 +232,6 @@ var app = {
 					});
 					$('#listaMinhasSenhas').append(lista);
 					$( "#listaMinhasSenhas" ).listview( "refresh" );
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -246,9 +252,6 @@ var app = {
 			            'Ok'                  // buttonName
 			        );
 					$("#minhas_senhas_page").trigger("pageshow");
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -278,9 +281,6 @@ var app = {
 						detalhesSenha.push(senhas.mediaTempoAtendimento);
 						detalhesSenha.push(senhas.horaAtendimento);
 					});
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
