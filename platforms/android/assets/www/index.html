@@ -7,6 +7,17 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.3.2.min.css" />
+
+        <script src="http://maps.google.com/maps/api/js?sensor=true" type="text/javascript"></script>
+       	<script type="text/javascript" src="phonegap.js"></script>
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery.mobile-1.3.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery.ui.map.full.min.js"></script>
+		<script type="text/javascript" src="js/index.js"></script>		
+    	<script type="text/javascript">
+    	app.initialize();
+    	</script>
+
         <title>MRC</title>
     </head>
     <body>
@@ -119,7 +130,7 @@
  	<ul data-role="listview" data-corners="false" data-inset="true" style="min-width:210px;" data-theme="c">
             <li data-role="divider" data-theme="b">Escolha uma opção:</li>
             <li><a href="#minha_senha_detalhes_page">Ver detalhes</a></li>
-            <li><a href="#"  >Ver localização no mapa</a></li>
+            <li><a href="#google_maps"  >Ver localização no mapa</a></li>
             <div data-role="collapsible-set"   data-corners="false"  data-theme="c" data-content-theme="c" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-iconpos="right" style="margin:0; width:250px;">
 		        <div data-role="collapsible" data-inset="false" >
 		            <h2>Desistir</h2>
@@ -164,18 +175,70 @@
 		</div>
 		<!-- Content -->
 		<div data-role="content">
-		detalhes
+			<div class="center-wrapper">
+				<button data-theme="b" data-inline="true"  id="detalhes_senhaActual" >Senha Actual</button>
+			</div>
+			<form>
+		     <label for="detalhes_minhaSenha">Minha Senha:</label>
+		     <input name="detalhes_minhaSenha" id="detalhes_minhaSenha" readonly="readonly" type="text">
+		     <label for="detalhes_dataEmissao">Data Emissão:</label>
+		     <input name="detalhes_dataEmissao" id="detalhes_dataEmissao" readonly="readonly" type="text">
+		     <label for="detalhes_horaPrevista">Hora prevista de atendimento:</label>
+		     <input name="detalhes_horaPrevista" id="detalhes_horaPrevista" readonly="readonly" type="text">
+		     <label for="detalhes_tempoEspera">Tempo médio de espera:</label>
+		     <input name="detalhes_tempoEspera" id="detalhes_tempoEspera" readonly="readonly" type="text">
+		     <label for="detalhes_tempoAtendimento">Tempo médio de atendimento:</label>
+		     <input name="detalhes_tempoAtendimento" id="detalhes_tempoAtendimento" readonly="readonly" type="text">
+		     <label for="detalhes_frontDesk">Serviço de Atendimento:</label>
+		     <input name="detalhes_frontDesk" id="detalhes_frontDesk" readonly="readonly" type="text">
+		     <label for="detalhes_localizacao">Localização:</label>
+		     <input name="detalhes_localizacao" id="detalhes_localizacao" readonly="readonly" type="text">
+		     <label for="detalhes_balcaoAtendimento">Balcão de atendimento:</label>
+		     <input name="detalhes_balcaoAtendimento" id="detalhes_balcaoAtendimento" readonly="readonly" type="text">
+		     <label for="detalhes_morada">Morada:</label>
+		     <textarea cols="40" rows="8" name="detalhes_morada" id="detalhes_morada" readonly="readonly"></textarea>
+		</form>
+		</div>
+	</div>
+
+	<!---------------------------- Página do Google Maps ---------------------------->
+	<div data-role="page" id="google_maps">
+	<!-- Header -->
+		<div data-role="header" id="gmapsHeader" style="overflow: hidden;" >
+			<h1>UC - Front Desk</h1>
+			<a href="#minhas_senhas_page" data-icon="back" class="ui-btn-left" data-iconpos="notext"></a>
+			<a href="#painelDefinicoes" data-icon="gear" class="ui-btn-right" data-iconpos="notext"></a>
+		</div>
+		<!-- Content -->
+		<div data-role="content" >
+ 		<div class="ui-bar-c ui-corner-all ui-shadow" style="padding:1em;">
+                    <div id="map_canvas" style="height:300px;"></div>
+                    <div data-role="fieldcontain">
+                        <label for="from">Origem</label> 
+                        <input type="text" id="from" value=""/>
+                    </div>
+                    <div data-role="fieldcontain">
+                        <label for="to">Destino</label> 
+                        <input type="text" id="to" value=""/>
+                    </div>
+                    <div data-role="fieldcontain">
+                        <label for="mode" class="select">Método de transporte:</label>
+                        <select name="select-choice-0" id="mode">
+                            <option value="DRIVING">Carro</option>
+                            <option value="WALKING">A pé</option>
+                        </select>
+                    </div>
+                    <a data-icon="search" data-role="button" href="#" id="getDirections">Obter direcções</a>
+                </div>
+                <div id="results" style="display:none;">
+                    <div id="directions"></div>
+                </div>
+			 <!-- <div id="map_canvas"></div>-->
 		</div>
 	</div>
 
 
 
-	<script type="text/javascript" src="phonegap.js"></script>
-	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="js/jquery.mobile-1.3.2.min.js"></script>
-	<script type="text/javascript" src="js/index.js"></script>
-    <script type="text/javascript">
-    app.initialize();
-    </script>
+
 </body>
 </html>
