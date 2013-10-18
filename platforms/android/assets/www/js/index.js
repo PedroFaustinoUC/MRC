@@ -133,9 +133,6 @@ var app = {
 			            $('#balcaoAtendimento').append($('<option>').text(balcaoAtendimento.nome).attr('value', balcaoAtendimento.idbalcaoatendimento));
 					});
 					$( "#balcaoAtendimento" ).selectmenu( "refresh" );
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					alert('Erro: ' + textStatus);
 				}
 			});
 		    }
@@ -235,6 +232,37 @@ var app = {
 				}
 			});
 		    }
+
+		//Webservice - valida se o utilizador já tem uma senha no serviço em causa
+	    function validaSenhaUtilizador(uniqueID){
+		    $.ajax({
+				type: 'GET',
+				url: rootURL+"utilizador/"+uniqueID,
+				dataType: "json", // data type of response
+				success: function(data){
+					var senhaExistente = false;
+					var list = data == null ? [] : (data.senhas instanceof Array ? data.senhas : [data.senhas]);
+					if(data.senhas.length==0)
+						$.mobile.changePage("#info_gerar_senha_page");
+					else 
+					{
+					$.each(list, function(index, senhas) {
+						if(senhas.idFrontDesk==$("#frontdesk").val() && senhas.idLocalizacao==$("#localizacao").val() && senhas.idBalcaoAtendimento==$("#balcaoAtendimento").val())
+						senhaExistente=true;
+					});
+					if(senhaExistente)
+						navigator.notification.alert(
+				            'Já possui uma senha para este serviço.',  // message
+				            null,         // callback
+				            'Inválido',            // title
+				            'Ok'                  // buttonName
+				        );
+					else
+						$.mobile.changePage("#info_gerar_senha_page");
+					}
+				}
+			});
+		    }
 	    
 	  //Webservice - desistir da senha
 	    function giveUpSenha(idSenhaPopUp){
@@ -281,6 +309,26 @@ var app = {
 						detalhesSenha.push(senhas.mediaTempoAtendimento);
 						detalhesSenha.push(senhas.horaAtendimento);
 					});
+				}
+			});
+		    }
+
+		    //Webservice - validação do horário do serviço
+	    	function getHorario(idFrontDesk,idLocalizacao){
+		    $.ajax({
+				type: 'GET',
+				url: rootURL+"frontdesk/"+idFrontDesk+"/localizacao/"+idLocalizacao+"/horario",
+				dataType: "json", // data type of response
+				success: function(data){
+					if(data.horario==0)
+					navigator.notification.alert(
+			            'O serviço encontra-se encerrado.',  // message
+			            null,         // callback
+			            'Horário indisponível',   // title
+			            'Ok'                  // buttonName
+			        );
+					else
+					 validaSenhaUtilizador(uniqueID);
 				}
 			});
 		    }
@@ -396,11 +444,16 @@ var app = {
 	    $("#localizacao").on("change",function(){
 	    	$("#balcaoAtendimento").selectmenu( "enable" );
 	    	getBalcaoAtendimento($("#frontdesk").val(),$("#localizacao").val());
+	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
 	    });
 	    
 	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
 	    $("#balcaoAtendimento").on("change",function(){
 	    	$("#gerar_senha_page_avancarButton").removeClass( "ui-disabled" );
+	    });
+
+	    $("#gerar_senha_page_avancarButton").on("click",function(){
+	    	getHorario($("#frontdesk").val(),$("#localizacao").val());
 	    });
 	    
 	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
@@ -445,7 +498,7 @@ var app = {
 			$('#detalhes_senhaActual').siblings('.ui-btn-inner').children('.ui-btn-text').text("Senha Actual: "+detalhesSenha[9]);
 			$( "#detalhes_senhaActual" ).buttonMarkup( "refresh" );
 			$('#detalhes_minhaSenha').val(detalhesSenha[8]);
-			$('#detalhes_dataEmissao').val(detalhesSenha[2]+" na data "+detalhesSenha[1]);
+			$('#detalhes_dataEmissao').val(detalhesSenha[2]+" | "+detalhesSenha[1]);
 			$('#detalhes_horaPrevista').val(detalhesSenha[12]);
 			$('#detalhes_tempoEspera').val(detalhesSenha[10]);
 			$('#detalhes_tempoAtendimento').val(detalhesSenha[11]);
