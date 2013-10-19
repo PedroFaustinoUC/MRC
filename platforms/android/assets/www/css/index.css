@@ -8,3 +8,7 @@ margin: 0 auto;
 #map_canvas {
             height: 100%;
   }
+  
+table { width:100%; }
+table thead th { text-align:left; border-bottom-width:1px; border-top-width:1px; }
+table th, td { text-align:left; padding:6px;} 

@@ -1,4 +1,8 @@
+//ID do registo no google cloud messaging
+var gcmID = "";
 var app = {
+
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -44,29 +48,29 @@ var app = {
     	//Listener conexão Internet
     	document.addEventListener("offline", onOffline, false);
 
+    	//Notificação
+	    var pushNotification = window.plugins.pushNotification;
+		pushNotification.register(app.successHandler, app.errorHandler,{"senderID":"691270257065","ecb":"app.onNotificationGCM"});
+
 	    /*
 	     * @Declaração de variáveis globais
 	     */
 	    //Variável que armazena o identificador unico do telemovel
 	    var uniqueID = device.uuid;
 	    //URL base do webservice
-	    //var rootURL = "http://10.3.3.126/mrc/api/";
-	    var rootURL = "http://10.3.1.39/mrc/api/";
+	    //var rootURL = "http://10.3.1.39/mrc/api/";
+	    var rootURL = "http://192.168.1.64/mrc/api/";
 	    var idSenhaPopUp = 0;
 	    var detalhesSenha=[];
 	    var windowWidth = $(window).width();
         var windowHeight = $(window).height();
         var directionDisplay,directionsService = new google.maps.DirectionsService(),map;
-	    //var rootURL = "http://192.168.1.64/mrc/api/";
-	    
+      
 	    /*
 	     * @Declaração de Funções
 	     */
-	    
 	    //Quando se carrega na tecla de retroceder a aplicação fecha
 	    function onBackKeyDown() {
-	    	//playBeep()
-	    	//vibrate()
 	    	$.mobile.showPageLoadingMsg("a", "A fechar aplicação");
 	    	setTimeout(function () {navigator.app.exitApp();}, 1000);
 	    	
@@ -82,7 +86,68 @@ var app = {
 	            'Ok'                  // buttonName
 	        );
 		};
-		
+
+		//Verificação do localStorage para verificar se o utilizador está logado
+		//Adapta o botão de login de acordo com o estado
+		function refreshLoginButton (){
+		if (localStorage.getItem("login") == null || localStorage.getItem("login") == 0){
+			$(".loginButton").attr("data-icon","gear");
+			$(".loginButton").attr("data-theme","a");
+			$( ".loginButton" ).buttonMarkup( "refresh" );}
+		else if(localStorage.getItem("login") == 1){
+			$(".loginButton").attr("data-icon","delete");
+			$(".loginButton").attr("data-theme","a");
+			$( ".loginButton").buttonMarkup( "refresh" );}
+		}
+
+		//Webservice - valida o email e a password do utilizador
+	    function validaLogin(username,password){
+		    $.ajax({
+				type: 'POST',
+				url: rootURL+"utilizador",
+				dataType: "json",
+	    		data: JSON.stringify({
+	    			"username": username, 
+	    			"password": password
+	    			}),
+				success: function(data){
+					if(data==1)
+					{
+						navigator.notification.alert(
+				            'Login efectuado com sucesso!',  // message
+				            null,         // callback
+				            'Sucesso',            // title
+				            'Ok'                  // buttonName
+				        );
+				        localStorage.setItem("login", "1");
+				        refreshLoginButton();
+				        $( "#painelDefinicoes" ).dialog( "close" );
+				    }
+					else if (data==0)
+					{
+						navigator.notification.alert(
+				            'Login incorrecto!',  // message
+				            null,         // callback
+				            'Erro',            // title
+				            'Ok'                  // buttonName
+				        );
+					}
+				}
+			});
+		    }
+
+		    //Webservice - valida o email e a password do utilizador
+	    function logout(){
+	    	navigator.notification.alert(
+				            'Logout efectuado com sucesso!',  // message
+				            null,         // callback
+				            'Sucesso',            // title
+				            'Ok'                  // buttonName
+				        );
+		    localStorage.setItem("login", "0");
+		    refreshLoginButton();
+		    }
+	    
 	    //Webservice - carregamento dos serviços de atendimento
 	    function getFrontDesk(){
 		    $.ajax({
@@ -155,7 +220,7 @@ var app = {
 		    }
 	    
 		//Webservice - gerar senha
-	    function addSenha(frontDesk, localizacao,balcaoAtendimento,uniqueID) {
+	    function addSenha(frontDesk,localizacao,balcaoAtendimento,uniqueID,email) {
 	    	$.ajax({
 	    		type: 'POST',
 	    		contentType: 'application/json',
@@ -165,7 +230,9 @@ var app = {
 	    			"frontDesk": frontDesk, 
 	    			"localizacao": localizacao, 
 	    			"balcaoAtendimento": balcaoAtendimento,
-	    			"uniqueID": uniqueID
+	    			"uniqueID": uniqueID,
+	    			"gcmID": gcmID,
+	    			"email":email
 	    			}),
 	    		success: function(data, textStatus, jqXHR){
 	    			getSenhaUtilizador(data.id);
@@ -193,7 +260,7 @@ var app = {
 	    function getSenhasUtilizador(uniqueID){
 		    $.ajax({
 				type: 'GET',
-				url: rootURL+"utilizador/"+uniqueID,
+				url: rootURL+"utilizador/"+uniqueID+"/senhas",
 				dataType: "json", // data type of response
 				success: function(data){
 					$('#listaMinhasSenhas').empty();
@@ -233,11 +300,11 @@ var app = {
 			});
 		    }
 
-		//Webservice - valida se o utilizador já tem uma senha no serviço em causa
+		//Webservice - validar se o utilizador já tem uma senha no serviço em causa
 	    function validaSenhaUtilizador(uniqueID){
 		    $.ajax({
 				type: 'GET',
-				url: rootURL+"utilizador/"+uniqueID,
+				url: rootURL+"utilizador/"+uniqueID+"/senhas",
 				dataType: "json", // data type of response
 				success: function(data){
 					var senhaExistente = false;
@@ -308,19 +375,21 @@ var app = {
 						detalhesSenha.push(senhas.mediaTempoEspera);
 						detalhesSenha.push(senhas.mediaTempoAtendimento);
 						detalhesSenha.push(senhas.horaAtendimento);
+						detalhesSenha.push(senhas.idFrontDesk);
+						detalhesSenha.push(senhas.idLocalizacao);
 					});
 				}
 			});
 		    }
 
-		    //Webservice - validação do horário do serviço
-	    	function getHorario(idFrontDesk,idLocalizacao){
+		    //Webservice - validar o horário do serviço
+	    	function validaHorario(idFrontDesk,idLocalizacao){
 		    $.ajax({
 				type: 'GET',
 				url: rootURL+"frontdesk/"+idFrontDesk+"/localizacao/"+idLocalizacao+"/horario",
 				dataType: "json", // data type of response
 				success: function(data){
-					if(data.horario==0)
+					if(data.aberto==0)
 					navigator.notification.alert(
 			            'O serviço encontra-se encerrado.',  // message
 			            null,         // callback
@@ -329,6 +398,25 @@ var app = {
 			        );
 					else
 					 validaSenhaUtilizador(uniqueID);
+				}
+			});
+		    }
+
+		    //Webservice - carregar os horários dos serviços
+		    function getHorario(idFrontDesk,idLocalizacao){
+		    	$.ajax({
+				type: 'GET',
+				url: rootURL+"frontdesk/"+idFrontDesk+"/localizacao/"+idLocalizacao+"/horario",
+				dataType: "json", // data type of response
+				success: function(data){
+					$("#horarioTabela tbody").html("");
+					var list = data == null ? [] : (data.horario instanceof Array ? data.horario : [data.horario]);
+					var conteudo = "";
+					$.each(list, function(index, horario) {
+						conteudo += '<tr><th>'+horario.diaSemana+'</th><td>'+horario.horaInicio+'</td><td>'+horario.horaFim+'</td></tr>';
+					});
+					$("#horarioTabela tbody").append(conteudo);
+					$.mobile.changePage("#horarioServico",{ role: "dialog" } );
 				}
 			});
 		    }
@@ -356,7 +444,7 @@ var app = {
 		     */
 		     function initialize() 
             {
-            	navigator.geolocation.getCurrentPosition(onSuccessGPS, onErrorGPS);
+            	navigator.geolocation.getCurrentPosition(onSuccessGPS, onErrorGPS,{ maximumAge: 5000, timeout: 5000, enableHighAccuracy: true });
                 directionsDisplay = new google.maps.DirectionsRenderer();
                 var mapCoord= detalhesSenha[6].split(",");
                 var mapCenter = new google.maps.LatLng(mapCoord[0],mapCoord[1]);
@@ -411,10 +499,31 @@ var app = {
 	     * É necessário carregar a lista de Serviços de Atendimento assim que a APP inicia
 	     */
 	    getFrontDesk();
+
+	    //Criação do botão de login dinamicamente
+	    refreshLoginButton();
 	    
 	    /*
 	     * @Declaração de Eventos
 	     */   
+
+	    //Ao submeter o e-mail e a password procede-se à validação dos mesmos
+   	    $("#loginSubmit").on("click",function(){
+	    	validaLogin($("#loginUsername").val(),$("#loginPassword").val());
+	    })
+
+   	    //Caso o utilizador esteja logado o botão "loginButton" ao ser clicado efectua o logout
+	    $(".loginButton").on("click",function(){
+		if (localStorage.getItem("login") == null || localStorage.getItem("login") == 0){
+	    	$.mobile.changePage("#painelDefinicoes",{ role: "dialog" } );
+	    	}
+	   	else if (localStorage.getItem("login") == 1){
+	    	logout();
+			return false;
+	    	}
+	    })
+
+	    /* !!DISABLED!!
 	    //Cada acesso à página "Gerar Ticket" requer uma chamada ao webservice correspondente
 	    //Isto permite ter os dados actualizados
 	    $("#gerar_senha_page").on( "pageshow", function(){
@@ -425,8 +534,9 @@ var app = {
 	    	$('#balcaoAtendimento').selectmenu( "disable" );
 	    	$( "#balcaoAtendimento" ).selectmenu( "refresh" );
 	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
+	    	$("#gerar_senha_page_horarioButton").addClass( "ui-disabled" );
 	    	getFrontDesk();
-	    });
+	    });*/
 	    
 	    //Quando o select "Serviço de Atendimento" for alterado o select "Localização" fica activo
 	    //Após o select "Localizacao" ficar activo, são carregados os dados
@@ -436,6 +546,7 @@ var app = {
 	    	$('#balcaoAtendimento').selectmenu( "disable" );
 	    	$( "#balcaoAtendimento" ).selectmenu( "refresh" );
 	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
+	    	$("#gerar_senha_page_horarioButton").addClass( "ui-disabled" );
 	    	getLocalizacao($("#frontdesk").val());
 	    });
 	    
@@ -445,6 +556,7 @@ var app = {
 	    	$("#balcaoAtendimento").selectmenu( "enable" );
 	    	getBalcaoAtendimento($("#frontdesk").val(),$("#localizacao").val());
 	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
+	    	$("#gerar_senha_page_horarioButton").removeClass( "ui-disabled" );
 	    });
 	    
 	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
@@ -453,8 +565,18 @@ var app = {
 	    });
 
 	    $("#gerar_senha_page_avancarButton").on("click",function(){
+	    	//validaHorario($("#frontdesk").val(),$("#localizacao").val());
+	    	$.mobile.changePage("#info_gerar_senha_page");
+	    });
+
+	    $("#gerar_senha_page_horarioButton").on("click",function(){
 	    	getHorario($("#frontdesk").val(),$("#localizacao").val());
 	    });
+
+ 		$("#minha_senha_detalhes_horarioButton").on("click",function(){
+	    	getHorario(detalhesSenha[13],detalhesSenha[14]);
+	    });
+	    
 	    
 	    //Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
 	    $("#info_gerar_senha_page").on("pagebeforeshow",function(){
@@ -468,7 +590,7 @@ var app = {
 	    
 	    //Quando se clica no botão de gerar ticket é gerada uma nova senha
 	    $("#info_gerar_senha_page_gerarTicketButton").on("click",function(){
-	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID);
+	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID,$("#loginUsername").val());
 	    });
 	    
 	    //Quando a página das senhas é carregada 
@@ -516,14 +638,6 @@ var app = {
             calculateRoute();
 	    });
 
-	    /*
-	     * Notificação
-	     */
-	    var pushNotification = window.plugins.pushNotification;
-		pushNotification.register(app.successHandler, app.errorHandler,{"senderID":"691270257065","ecb":"app.onNotificationGCM"});
-
-
-
 	 //@end
     },
 
@@ -542,13 +656,18 @@ onNotificationGCM: function(e) {
                 if ( e.regid.length > 0 )
                 {
                     console.log("Regid " + e.regid);
-                    alert('registration id = '+e.regid);
+                    gcmID = e.regid;
                 }
             break;
  
             case 'message':
               // this is the actual push notification. its format depends on the data model from the push server
-              alert('message = '+e.message+' msgcnt = '+e.msgcnt);
+              navigator.notification.alert(
+			            e.message,  // message
+			            null,         // callback
+			            'Aviso',   // title
+			            'Ok'                  // buttonName
+			        );
             break;
  
             case 'error':
