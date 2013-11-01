@@ -28,6 +28,7 @@
 		<!-- Header -->
 		<div data-role="header" style="overflow: hidden;">
 			<h1>UC - Front Desk</h1>
+			<a href="#" class="ui-btn-left refreshButtonHeader" data-icon="refresh" data-iconpos="notext"></a>
 			<a href="#" class="ui-btn-right loginButton" data-iconpos="notext"></a>
 			<div data-role="navbar">
 				<ul>
@@ -110,7 +111,7 @@
 					<li><a href="#minha_senha_detalhes_page">Ver detalhes</a></li>
 					<li><a href="#google_maps"  >Ver localização no mapa</a></li>
 					<div data-role="collapsible-set"   data-corners="false"  data-theme="c" data-content-theme="c" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-iconpos="right" style="margin:0; width:250px;">
-						<div data-role="collapsible" data-inset="false" >
+						<div data-role="collapsible" id="desistir_dataCollapsed" data-inset="false" >
 							<h2>Desistir</h2>
 							<ul data-role="listview" data-theme="a">
 								<li data-icon="delete"><a href="#" id="desistir_minhas_senhas_page" >Confirmar</a></li>
@@ -199,10 +200,10 @@
 						<label for="from">Origem</label> 
 						<input type="text" id="from" value=""/>
 					</div>
-					<div data-role="fieldcontain">
-						<label for="to">Destino</label> 
-						<input type="text" id="to" value=""/>
-					</div>
+					<!-- <div data-role="fieldcontain">
+						<!-- <label for="to">Destino</label> -->
+						<input type="hidden" id="to" value=""/>
+					<!-- </div>-->
 					<div data-role="fieldcontain">
 						<label for="mode" class="select">Método de transporte:</label>
 						<select name="select-choice-0" id="mode">

@@ -42,6 +42,7 @@ var app = {
 						}
 					});
 
+
 	    //Listener da tecla de retroceder
     	document.addEventListener("backbutton", onBackKeyDown, false);
     	
@@ -59,13 +60,19 @@ var app = {
 	    var uniqueID = device.uuid;
 	    //URL base do webservice
 	    //var rootURL = "http://10.3.1.39/mrc/api/";
-	    var rootURL = "http://192.168.1.64/mrc/api/";
+	    //var rootURL = "http://192.168.1.64/mrc/api/";
+	    var rootURL = "http://ec2-54-242-130-236.compute-1.amazonaws.com/mrc/api/";
 	    var idSenhaPopUp = 0;
 	    var detalhesSenha=[];
 	    var windowWidth = $(window).width();
         var windowHeight = $(window).height();
-        var directionDisplay,directionsService = new google.maps.DirectionsService(),map;
-      
+        try{
+        var directionsDisplay,directionsService = new google.maps.DirectionsService(),map;
+      	}
+      	catch(err)
+		{
+			onOffline();
+		}
 	    /*
 	     * @Declaração de Funções
 	     */
@@ -94,7 +101,7 @@ var app = {
 			$(".loginButton").attr("data-icon","gear");
 			$(".loginButton").attr("data-theme","a");
 			$( ".loginButton" ).buttonMarkup( "refresh" );}
-		else if(localStorage.getItem("login") == 1){
+		else{
 			$(".loginButton").attr("data-icon","delete");
 			$(".loginButton").attr("data-theme","a");
 			$( ".loginButton").buttonMarkup( "refresh" );}
@@ -119,7 +126,7 @@ var app = {
 				            'Sucesso',            // title
 				            'Ok'                  // buttonName
 				        );
-				        localStorage.setItem("login", "1");
+				        localStorage.setItem("login", $("#loginUsername").val());
 				        refreshLoginButton();
 				        $( "#painelDefinicoes" ).dialog( "close" );
 				    }
@@ -265,21 +272,16 @@ var app = {
 				success: function(data){
 					$('#listaMinhasSenhas').empty();
 					var list = data == null ? [] : (data.senhas instanceof Array ? data.senhas : [data.senhas]);
-					if(data.senhas.length==0)
-						{
-						$('#minhasSenhasRefresh').empty();
-			            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("Não existem senhas");
-						$( "#minhasSenhasRefresh" ).buttonMarkup( "refresh" );
-						}
-					else 
-					{
-						$('#minhasSenhasRefresh').empty();
-			            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("Actualizar");
-						$( "#minhasSenhasRefresh" ).buttonMarkup( "refresh" );
-						}
+					$('#minhasSenhasRefresh').empty();
+		            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("Não existem senhas");
+					$( "#minhasSenhasRefresh" ).buttonMarkup( "refresh" );
 					var idControlo = 0;
 					var lista = "";				
 					$.each(list, function(index, senhas) {
+						if(senhas.estado==1){
+							$('#minhasSenhasRefresh').empty();
+			            $('#minhasSenhasRefresh').siblings('.ui-btn-inner').children('.ui-btn-text').text("Actualizar");
+						$( "#minhasSenhasRefresh" ).buttonMarkup( "refresh" );
 						if(idControlo != senhas.idFrontDesk){
 						lista+= '<li data-role="list-divider">'+senhas.nomeFrontDesk+'</li>';
 						idControlo=senhas.idFrontDesk
@@ -292,7 +294,7 @@ var app = {
 						else
 						lista+=('<p><strong>Senha Actual: </strong>'+senhas.nSenhaActual+'<strong> Hora Prevista: </strong>'+senhas.horaAtendimento+'</p>');
 						
-						lista+=('<p><strong>Minha Senha: </strong>'+senhas.nSenhaUtilizador+'</p></a></li>')
+						lista+=('<p><strong>Minha Senha: </strong>'+senhas.nSenhaUtilizador+'</p></a></li>')}
 					});
 					$('#listaMinhasSenhas').append(lista);
 					$( "#listaMinhasSenhas" ).listview( "refresh" );
@@ -346,7 +348,7 @@ var app = {
 			            'Desistir da Senha',   // title
 			            'Ok'                  // buttonName
 			        );
-					$("#minhas_senhas_page").trigger("pageshow");
+					$("#minhasSenhasRefresh").trigger("click");
 				}
 			});
 		    }
@@ -444,7 +446,7 @@ var app = {
 		     */
 		     function initialize() 
             {
-            	navigator.geolocation.getCurrentPosition(onSuccessGPS, onErrorGPS,{ maximumAge: 5000, timeout: 5000, enableHighAccuracy: true });
+            	navigator.geolocation.getCurrentPosition(onSuccessGPS, onErrorGPS,{ maximumAge: 5000, timeout: 10000, enableHighAccuracy: true });
                 directionsDisplay = new google.maps.DirectionsRenderer();
                 var mapCoord= detalhesSenha[6].split(",");
                 var mapCenter = new google.maps.LatLng(mapCoord[0],mapCoord[1]);
@@ -456,11 +458,13 @@ var app = {
                 map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
                 directionsDisplay.setMap(map);
                 directionsDisplay.setPanel(document.getElementById("directions")); 
+                $("#directions").empty();
 				$("#to").val(mapCenter);
             }
 
             function calculateRoute() 
             {
+            	google.maps.event.trigger(map, 'resize');
                 var selectedMode = $("#mode").val(),
                     start = $("#from").val(),
                     end = $("#to").val();
@@ -510,6 +514,7 @@ var app = {
 	    //Ao submeter o e-mail e a password procede-se à validação dos mesmos
    	    $("#loginSubmit").on("click",function(){
 	    	validaLogin($("#loginUsername").val(),$("#loginPassword").val());
+	    	return false;
 	    })
 
    	    //Caso o utilizador esteja logado o botão "loginButton" ao ser clicado efectua o logout
@@ -517,17 +522,16 @@ var app = {
 		if (localStorage.getItem("login") == null || localStorage.getItem("login") == 0){
 	    	$.mobile.changePage("#painelDefinicoes",{ role: "dialog" } );
 	    	}
-	   	else if (localStorage.getItem("login") == 1){
+	   	else {
 	    	logout();
 			return false;
 	    	}
 	    })
 
-	    /* !!DISABLED!!
-	    //Cada acesso à página "Gerar Ticket" requer uma chamada ao webservice correspondente
-	    //Isto permite ter os dados actualizados
-	    $("#gerar_senha_page").on( "pageshow", function(){
-	    	$("#localizacao").empty();
+	    //Quando se clica no botão refreshButtonHeader a página é recarregada
+	    //Útil para quando ocorrem problemas de ligação
+	    $(".refreshButtonHeader").on("click",function(){
+			$("#localizacao").empty();
 	    	$("#localizacao").selectmenu( "disable" );
 	    	$( "#localizacao" ).selectmenu( "refresh" );
 	    	$('#balcaoAtendimento').empty();
@@ -536,8 +540,8 @@ var app = {
 	    	$("#gerar_senha_page_avancarButton").addClass( "ui-disabled" );
 	    	$("#gerar_senha_page_horarioButton").addClass( "ui-disabled" );
 	    	getFrontDesk();
-	    });*/
-	    
+	    });
+    
 	    //Quando o select "Serviço de Atendimento" for alterado o select "Localização" fica activo
 	    //Após o select "Localizacao" ficar activo, são carregados os dados
 	    $("#frontdesk").on("change",function(){
@@ -565,8 +569,7 @@ var app = {
 	    });
 
 	    $("#gerar_senha_page_avancarButton").on("click",function(){
-	    	//validaHorario($("#frontdesk").val(),$("#localizacao").val());
-	    	$.mobile.changePage("#info_gerar_senha_page");
+	    	validaHorario($("#frontdesk").val(),$("#localizacao").val());
 	    });
 
 	    $("#gerar_senha_page_horarioButton").on("click",function(){
@@ -590,7 +593,10 @@ var app = {
 	    
 	    //Quando se clica no botão de gerar ticket é gerada uma nova senha
 	    $("#info_gerar_senha_page_gerarTicketButton").on("click",function(){
-	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID,$("#loginUsername").val());
+	    	var login = localStorage.getItem("login");
+	    	if (login == 0)
+	    		login = "";
+	    	addSenha($("#frontdesk").val(),$("#localizacao").val(),$("#balcaoAtendimento").val(),uniqueID,login);
 	    });
 	    
 	    //Quando a página das senhas é carregada 
@@ -612,6 +618,7 @@ var app = {
 	    //Quando se confirma a desistencia de uma senha esta é removida
 	    $("#desistir_minhas_senhas_page").on("click",function(){
 	    	giveUpSenha(idSenhaPopUp);
+	    	$( "#desistir_dataCollapsed" ).trigger('collapse');
 		});
 
 		//Quando o select "Balcao Atendimento" for alterado o botão "Avançar" fica activo
@@ -668,6 +675,7 @@ onNotificationGCM: function(e) {
 			            'Aviso',   // title
 			            'Ok'                  // buttonName
 			        );
+              $("#minhasSenhasRefresh").trigger("click");
             break;
  
             case 'error':
