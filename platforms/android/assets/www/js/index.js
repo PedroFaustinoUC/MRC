@@ -435,7 +435,7 @@ var app = {
 		    function onErrorGPS(error) {
 		    	navigator.notification.alert(
 			            'Ocorreu um erro ao tentar obter as suas coordenadas.',  // message
-			            null,         // callback
+			            calculateRoute(),         // callback
 			            'Erro de GPS',   // title
 			            'Ok'                  // buttonName
 			        );
@@ -464,6 +464,8 @@ var app = {
 
             function calculateRoute() 
             {
+            	$('body').removeClass('ui-loading');  
+                $.mobile.hidePageLoadingMsg();
             	google.maps.event.trigger(map, 'resize');
                 var selectedMode = $("#mode").val(),
                     start = $("#from").val(),
@@ -638,6 +640,8 @@ var app = {
 	    });
 
 		$("#google_maps").on("pagebeforeshow",function(){
+			$('body').addClass('ui-loading');
+		    $.mobile.showPageLoadingMsg('a', 'A procurar GPS', false);
             initialize() ;
 	    });
 	    
